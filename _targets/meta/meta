@@ -1,1 +1,6 @@
 name|type|data|command|depend|seed|path|time|size|bytes|format|repository|iteration|parent|children|seconds|warnings|error
+d|stem|a96cd6c1b7585e9c|93f9c49ecf8b31b8|089667840400cd4a|592496261||t19744.0414274302s|d82d2b46d31b8249|4032182|rds|local|vector|||0.38||
+fileData|stem|a96cd6c1b7585e9c|ee5d67d62e37be43|ef46db3751d8e999|-1990176534|data/dictionaries.rds|t19744.038622062s|d82d2b46d31b8249|4032182|file|local|vector|||0||
+plotProp|stem|4258c215830b346e|9bc3bb0454ebe6e3|98fb64627f9ef153|1799005919||t19744.0620943811s|799c04294a25da8d|4102317|rds|local|vector|||0.36||
+plotProportions|function|11da7edf56f52738|||||||||||||||
+sessionInfo|stem|794be3614d98cc38|74c06756c0452f1d|696eeb75af4c39be|-1689045739||t19744.0410104656s|a1c456b03adbfbf8|44|rds|local|vector|||0.07||
