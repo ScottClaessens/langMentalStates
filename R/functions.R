@@ -99,9 +99,9 @@ plotModel1 <- function(hyp1) {
     pivot_longer(everything()) %>%
     mutate(
       # correct ordering for plot
-      name = factor(name, levels = c("Overall", "Belief/\nKnowledge",
-                                     "Desire/\nWish", "Intention", "Perception",
-                                     "Emotion", "Arousal", "Other")),
+      name = factor(name, levels = c("Overall", "Belief/\nKnowledge", "Emotion",
+                                     "Intention", "Perception", "Desire/\nWish",
+                                     "Arousal", "Other")),
       # calculate odds ratio
       OR = exp(value)
       ) %>%
