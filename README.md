@@ -9,9 +9,7 @@ Comparing mental state attributions in Tongan and English.
 To run this code, you will need to [install R](https://www.r-project.org/) and the following R packages:
 
 ```
-install.packages(
-    c("tarchetypes", "targets")
-)
+install.packages(c("brms","tarchetypes","targets","tidybayes","tidyverse"))
 ```
 
 ### Executing code
