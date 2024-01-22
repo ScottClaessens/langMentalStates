@@ -35,3 +35,46 @@ plotProportions <- function(d) {
   ggsave(out, filename = "plots/proportions.pdf", width = 6, height = 4)
   return(out)
 }
+
+# pivot data wider
+pivotDataWider <- function(d) {
+  d %>%
+    group_by(word) %>%
+    summarise(
+      # english or tongan
+      language = unique(language),
+      # number of definitions with mental states
+      mental_state = sum(mental_state),
+      BK = sum(BK),
+      DW = sum(DW),
+      IN = sum(IN),
+      PE = sum(PE),
+      EM = sum(EM),
+      AR = sum(AR),
+      OT = sum(OT),
+      # total number of definitions
+      n = n(),
+      .groups = "drop"
+    )
+}
+
+# fit model 1 (no controls)
+fitModel1 <- function(dWide, outcome) {
+  brm(
+    formula = bf(
+      paste0(outcome, " | trials(n) ~ 0 + language"),
+      "phi ~ 0 + language"
+      ),
+    data = dWide,
+    family = beta_binomial,
+    prior = c(
+      # priors based on prior predictive check
+      prior(normal(-2, 1.0), class = b, coef = languageeng),
+      prior(normal(-2, 1.0), class = b, coef = languageton),
+      prior(normal(-1, 0.5), class = b, coef = languageeng, dpar = phi),
+      prior(normal(-1, 0.5), class = b, coef = languageton, dpar = phi)
+    ),
+    sample_prior = "yes",
+    cores = 4
+  )
+}
