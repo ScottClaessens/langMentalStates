@@ -6,8 +6,17 @@ source("R/functions.R")
 
 # packages for pipeline
 tar_option_set(
-  packages = c("brms", "tidyverse")
+  packages = c("brms", "tidybayes", "tidyverse")
 )
+
+# targets for model fitting
+targetsModels <-
+  tar_map(
+    values = tibble(outcome = c("mental_state", "BK", "DW", "IN", 
+                                "PE", "EM", "AR", "OT")),
+    tar_target(m1, fitModel1(dWide, outcome)),
+    tar_target(hyp1, hypothesis(m1, "b_languageeng - b_languageton = 0", class = NULL))
+  )
 
 # full pipeline
 list(
@@ -20,11 +29,10 @@ list(
   # get data in wide format for modelling
   tar_target(dWide, pivotDataWider(d)),
   # fit models
-  tar_map(
-    values = tibble(outcome = c("mental_state", "BK", "DW", "IN", 
-                                "PE", "EM", "AR", "OT")),
-    tar_target(m1, fitModel1(dWide, outcome))
-  ),
+  targetsModels,
+  tar_combine(hyp1, targetsModels[["hyp1"]], command = list(!!!.x)),
+  # plot model results
+  tar_target(plotM1, plotModel1(hyp1)),
   # session info
   tar_target(sessionInfo, writeLines(capture.output(sessionInfo()), "sessionInfo.txt"))
 )
