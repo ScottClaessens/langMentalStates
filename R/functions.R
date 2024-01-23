@@ -112,61 +112,84 @@ fitModel2 <- function(dWide, outcome) {
 }
 
 # plot results from models
-plotModel <- function(hyp, filename) {
-  # extract posterior log odds differences
-  post <-
-    lapply(hyp, function(x) x$samples[,1]) %>%
-    as_tibble()
-  # labels for plot
-  colnames(post) <- c(
-    "Overall",
-    "Belief/\nKnowledge",
-    "Desire/\nWish",
-    "Intention",
-    "Perception",
-    "Emotion",
-    "Arousal",
-    "Other"
-  )
-  out <-
+plotModelResults <- function(hyp1, hyp2) {
+  # extract posterior from list of brmsfit.hypothesis objects
+  extractPost <- function(hyp, label) {
+    # extract posterior log odds differences
+    post <-
+      lapply(hyp, function(x) x$samples[,1]) %>%
+      as_tibble()
+    # labels for plot
+    colnames(post) <- c(
+      "Overall",
+      "Belief/\nKnowledge",
+      "Desire/\nWish",
+      "Intention",
+      "Perception",
+      "Emotion",
+      "Arousal",
+      "Other"
+    )
     post %>%
-    pivot_longer(everything()) %>%
-    mutate(
-      # correct ordering for plot
-      name = factor(name, levels = c("Overall", "Belief/\nKnowledge", "Emotion",
-                                     "Intention", "Perception", "Desire/\nWish",
-                                     "Arousal", "Other")),
-      # calculate odds ratio
-      OR = exp(value)
-      ) %>%
+      pivot_longer(
+        cols = everything(),
+        names_to = "model",
+        values_to = "diff"
+        ) %>%
+      mutate(
+        # correct ordering for plot
+        model = factor(model, levels = c("Overall", "Belief/\nKnowledge", "Emotion",
+                                         "Intention", "Perception", "Desire/\nWish",
+                                         "Arousal", "Other")),
+        # calculate odds ratio
+        OR = exp(diff),
+        # label this set of models
+        label = label
+      )
+  }
+  out <-
+    # combine both sets of models
+    bind_rows(
+      extractPost(hyp1, label = "No controls\n(n = 78685)"),
+      extractPost(hyp2, label = "Controlling for\nword class\n(n = 47260)")
+    ) %>%
+    mutate(label = factor(label, levels = c("No controls\n(n = 78685)",
+                                            "Controlling for\nword class\n(n = 47260)"))) %>%
     # plot
-    ggplot(aes(x = OR, y = fct_rev(name))) +
-    # very small effect size window
+    ggplot(aes(x = diff, y = fct_rev(model), colour = label)) +
+    # effect size windows
     # https://easystats.github.io/effectsize/articles/interpret.html#chen2010big
-    annotate("rect", xmin = 0.60, xmax = 1.68, ymin = -Inf, ymax = Inf,
-              fill = "grey", alpha = 0.15) +
-    geom_vline(xintercept = 1, linetype = "dashed") +
+    annotate("rect", xmin = -1.25, xmax = 1.25, ymin = -Inf, ymax = Inf,
+             fill = "grey", alpha = 0.1) +
+    annotate("rect", xmin = -0.5, xmax = 0.5, ymin = -Inf, ymax = Inf,
+             fill = "grey", alpha = 0.2) +
+    geom_vline(xintercept = 0, linetype = "dashed") +
     # posterior odds ratios
-    stat_halfeye() +
+    stat_pointinterval(position = position_dodge(width = 0.4)) +
     # add direction annotations
-    annotate("text", label = "more common\nin English", x = 2.2, y = 4.4,
-             size = 2.8, fontface = "italic", colour = "grey") +
-    annotate("text", label = "more common\nin Tongan", x = 0.2, y = 4.4,
-             size = 2.8, fontface = "italic", colour = "grey") +
+    annotate("text", label = "more common\nin English", x = 1.55, y = 4.4,
+             size = 2.5, fontface = "italic", colour = "grey") +
+    annotate("text", label = "more common\nin Tongan", x = -1.55, y = 4.4,
+             size = 2.5, fontface = "italic", colour = "grey") +
     # add arrows
-    geom_segment(aes(x = 2.05, y = 4.85, xend = 2.35, yend = 4.85),
+    geom_segment(aes(x = 1.40, y = 4.8, xend = 1.70, yend = 4.8),
                  arrow = arrow(length = unit(0.2, "cm")), colour = "grey") +
-    geom_segment(aes(x = 0.35, y = 4.85, xend = 0.05, yend = 4.85),
+    geom_segment(aes(x = -1.40, y = 4.8, xend = -1.70, yend = 4.8),
                  arrow = arrow(length = unit(0.2, "cm")), colour = "grey") +
     # axes and theme
     ylab("Mental state class") +
     scale_x_continuous(
-      name = "Posterior odds ratio\n(difference between English and Tongan)",
-      breaks = seq(0, 2, by = 0.5),
-      limits = c(0, 2.35)
+      name = "Posterior log odds difference\nbetween English and Tongan",
+      breaks = seq(-1.5, 1.5, by = 0.5),
+      limits = c(-1.75, 1.75)
       ) +
-    theme_minimal()
+    guides(colour = guide_legend(byrow = TRUE)) +
+    theme_minimal() +
+    theme(
+      legend.title = element_blank(),
+      legend.spacing.y = unit(2, 'mm')
+      )
   # save plot
-  ggsave(out, filename = filename, width = 6, height = 5)
+  ggsave(out, filename = "plots/models.pdf", width = 7, height = 4)
   return(out)
 }
