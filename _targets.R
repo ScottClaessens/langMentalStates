@@ -2,7 +2,8 @@ options(tidyverse.quiet = TRUE)
 library(tarchetypes)
 library(targets)
 library(tidyverse)
-source("R/functions.R")
+source("R/functions_study1.R")
+source("R/functions_study2.R")
 
 # packages for pipeline
 tar_option_set(
@@ -24,6 +25,9 @@ targetsModels <-
 
 # full pipeline
 list(
+  
+  ### Study 1 - Dictionaries
+  
   # files
   tar_target(fileData, "data/dictionaries.rds", format = "file"),
   # load dictionary data
@@ -38,6 +42,11 @@ list(
   tar_combine(hyp2, targetsModels[["hyp2"]], command = list(!!!.x)),
   # plot model results
   tar_target(plotModels, plotModelResults(hyp1, hyp2)),
+  
+  ### Study 2 - Common Crawl
+  
+  #...
+  
   # session info
   tar_target(sessionInfo, writeLines(capture.output(sessionInfo()), "sessionInfo.txt"))
 )

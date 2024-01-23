@@ -43,9 +43,9 @@ plotM1|stem|51dd686dfd098305|c677656aaa8e7f83|a4c8ba4d8b1b18c5|1218902446||t1974
 plotM2|stem|72da859fd46ec2aa|e86a8eebfd88029f|8b851f0e6fe83ad7|993550033||t19745.3642110017s|864f066bd1b008cb|2344492|rds|local|vector|||1.99|1m22mRemoved 4472 rows containing missing values stat_slabinterval.. 1m22mUsing the size aesthetic with geom_segment was deprecated in ggplot2 3.4.0.36mℹ39m Please use the linewidth aesthetic instead.|
 plotModel|function|75b0b9386690ea85|||||||||||||||
 plotModel1|function|97414643651e6d4b|||||||||||||||
-plotModelResults|function|d7a54ee4af20e32a|||||||||||||||
-plotModels|stem|b4e948f6d658284e|2b725a2ea9ddb0a2|80848b712a601b57|796902106||t19745.9164518349s|8d112e966cd94378|4009292|rds|local|vector|||2.97|1m22mUsing the size aesthetic with geom_segment was deprecated in ggplot2 3.4.0.36mℹ39m Please use the linewidth aesthetic instead.|
-plotProp|stem|4258c215830b346e|9bc3bb0454ebe6e3|98fb64627f9ef153|1799005919||t19744.0620943811s|799c04294a25da8d|4102317|rds|local|vector|||0.36||
-plotProportions|function|11da7edf56f52738|||||||||||||||
+plotModelResults|function|10ebc38562b12d23|||||||||||||||
+plotModels|stem|4560681f12331033|2b725a2ea9ddb0a2|5b377b66e8eec849|796902106||t19745.9865024566s|309795ab2dda68c2|4009867|rds|local|vector|||3.24|1m22mUsing the size aesthetic with geom_segment was deprecated in ggplot2 3.4.0.36mℹ39m Please use the linewidth aesthetic instead.|
+plotProp|stem|4258c215830b346e|9bc3bb0454ebe6e3|15c3ba969e760721|1799005919||t19745.9864507479s|799c04294a25da8d|4102317|rds|local|vector|||0.99||
+plotProportions|function|c97f63efd388a649|||||||||||||||
 sessionInfo|stem|794be3614d98cc38|74c06756c0452f1d|696eeb75af4c39be|-1689045739||t19744.0410104656s|a1c456b03adbfbf8|44|rds|local|vector|||0.07||
 targetsModels|object|40c3b9783c2e57f7|||||||||||||||

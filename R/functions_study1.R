@@ -1,4 +1,4 @@
-# custom functions
+# custom functions for study 1
 
 # plot proportions of definitions
 plotProportions <- function(d) {
@@ -32,7 +32,7 @@ plotProportions <- function(d) {
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
   # save
-  ggsave(out, filename = "plots/proportions.pdf", width = 6, height = 4)
+  ggsave(out, filename = "plots/study1/proportions.pdf", width = 6, height = 4)
   return(out)
 }
 
@@ -190,6 +190,6 @@ plotModelResults <- function(hyp1, hyp2) {
       legend.spacing.y = unit(2, 'mm')
       )
   # save plot
-  ggsave(out, filename = "plots/models.pdf", width = 7, height = 4)
+  ggsave(out, filename = "plots/study1/models.pdf", width = 7, height = 4)
   return(out)
 }
