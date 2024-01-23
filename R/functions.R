@@ -54,6 +54,12 @@ pivotDataWider <- function(d) {
       OT = sum(OT),
       # total number of definitions
       n = n(),
+      # word class proportions
+      noun       = mean(noun,       na.rm = TRUE),
+      adjective  = mean(adjective,  na.rm = TRUE),
+      adverb     = mean(adverb,     na.rm = TRUE),
+      verb       = mean(verb,       na.rm = TRUE),
+      comb_other = mean(comb_other, na.rm = TRUE),
       .groups = "drop"
     )
 }
@@ -69,8 +75,34 @@ fitModel1 <- function(dWide, outcome) {
     family = beta_binomial,
     prior = c(
       # priors based on prior predictive check
-      prior(normal(-2, 1.0), class = b, coef = languageeng),
-      prior(normal(-2, 1.0), class = b, coef = languageton),
+      prior(normal(-2, 1), class = b, coef = languageeng),
+      prior(normal(-2, 1), class = b, coef = languageton),
+      prior(normal(-1, 0.5), class = b, coef = languageeng, dpar = phi),
+      prior(normal(-1, 0.5), class = b, coef = languageton, dpar = phi)
+    ),
+    sample_prior = "yes",
+    cores = 4
+  )
+}
+
+# fit model 2 (with word class controls)
+fitModel2 <- function(dWide, outcome) {
+  brm(
+    formula = bf(
+      paste0(outcome, " | trials(n) ~ 0 + language",
+             " + noun + adjective + adverb + verb"),
+      "phi ~ 0 + language"
+    ),
+    data = dWide,
+    family = beta_binomial,
+    prior = c(
+      # priors based on prior predictive check
+      prior(normal(-2, 1), class = b, coef = languageeng),
+      prior(normal(-2, 1), class = b, coef = languageton),
+      prior(normal(0, 1), class = b, coef = noun),
+      prior(normal(0, 1), class = b, coef = adjective),
+      prior(normal(0, 1), class = b, coef = adverb),
+      prior(normal(0, 1), class = b, coef = verb),
       prior(normal(-1, 0.5), class = b, coef = languageeng, dpar = phi),
       prior(normal(-1, 0.5), class = b, coef = languageton, dpar = phi)
     ),
