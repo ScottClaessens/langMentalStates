@@ -32,7 +32,7 @@ list(
   targetsModels,
   tar_combine(hyp1, targetsModels[["hyp1"]], command = list(!!!.x)),
   # plot model results
-  tar_target(plotM1, plotModel1(hyp1)),
+  tar_target(plotM1, plotModel(hyp1, filename = "plots/model1.pdf")),
   # session info
   tar_target(sessionInfo, writeLines(capture.output(sessionInfo()), "sessionInfo.txt"))
 )

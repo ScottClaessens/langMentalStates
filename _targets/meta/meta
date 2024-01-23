@@ -21,7 +21,8 @@ m1_mental_state|stem|48ddb01035ff5b4b|75e3799ca39ce3f3|dcbc1d9f57e238d2|11953878
 m1_OT|stem|d2f2bfd2568bf97f|e58ff4a4560a6b46|dcbc1d9f57e238d2|2066856016||t19744.2479861111s|9904a778b339bbda|2604890|rds|local|vector|||793.791||
 m1_PE|stem|ea6f98380e614dfc|b77bbb8d3d084095|dcbc1d9f57e238d2|536740014||t19744.2576851852s|eb5c343f04fded9f|2661317|rds|local|vector|||837.505||
 pivotDataWider|function|e24ccb6b19385b8a|||||||||||||||
-plotM1|stem|e11c7605a882da89|8614333348a295eb|b971679ff5e3924b|1218902446||t19744.977506055s|ab38129a33dec368|2060282|rds|local|vector|||1.23|1m22mRemoved 28 rows containing missing values stat_slabinterval.. 1m22mUsing the size aesthetic with geom_segment was deprecated in ggplot2 3.4.0.36mℹ39m Please use the linewidth aesthetic instead.|
+plotM1|stem|6b3cea2240a755f2|c677656aaa8e7f83|9eb394970e398bd8|1218902446||t19745.119003827s|67b99f5bed6e732d|2298130|rds|local|vector|||1.54|1m22mRemoved 12 rows containing missing values stat_slabinterval.. 1m22mUsing the size aesthetic with geom_segment was deprecated in ggplot2 3.4.0.36mℹ39m Please use the linewidth aesthetic instead.|
+plotModel|function|75b0b9386690ea85|||||||||||||||
 plotModel1|function|97414643651e6d4b|||||||||||||||
 plotProp|stem|4258c215830b346e|9bc3bb0454ebe6e3|98fb64627f9ef153|1799005919||t19744.0620943811s|799c04294a25da8d|4102317|rds|local|vector|||0.36||
 plotProportions|function|11da7edf56f52738|||||||||||||||

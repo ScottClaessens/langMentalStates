@@ -79,23 +79,25 @@ fitModel1 <- function(dWide, outcome) {
   )
 }
 
-# plot results from model 1
-plotModel1 <- function(hyp1) {
+# plot results from models
+plotModel <- function(hyp, filename) {
+  # extract posterior log odds differences
+  post <-
+    lapply(hyp, function(x) x$samples[,1]) %>%
+    as_tibble()
+  # labels for plot
+  colnames(post) <- c(
+    "Overall",
+    "Belief/\nKnowledge",
+    "Desire/\nWish",
+    "Intention",
+    "Perception",
+    "Emotion",
+    "Arousal",
+    "Other"
+  )
   out <-
-    # extract posterior log odds differences
-    lapply(hyp1, function(x) x$samples[,1]) %>%
-    as_tibble() %>%
-    # labels for plot
-    rename(
-      Overall              = hyp1_mental_state,
-      `Belief/\nKnowledge` = hyp1_BK,
-      `Desire/\nWish`      = hyp1_DW,
-      Intention            = hyp1_IN,
-      Perception           = hyp1_PE,
-      Emotion              = hyp1_EM,
-      Arousal              = hyp1_AR,
-      Other                = hyp1_OT
-    ) %>%
+    post %>%
     pivot_longer(everything()) %>%
     mutate(
       # correct ordering for plot
@@ -115,18 +117,24 @@ plotModel1 <- function(hyp1) {
     # posterior odds ratios
     stat_halfeye() +
     # add direction annotations
-    annotate("text", label = "more common\nin English", x = 2.1, y = 4.5,
-             size = 2.8, fontface = "italic") +
-    annotate("text", label = "more common\nin Tongan", x = 0.2, y = 4.5,
-             size = 2.8, fontface = "italic") +
+    annotate("text", label = "more common\nin English", x = 2.2, y = 4.4,
+             size = 2.8, fontface = "italic", colour = "grey") +
+    annotate("text", label = "more common\nin Tongan", x = 0.2, y = 4.4,
+             size = 2.8, fontface = "italic", colour = "grey") +
+    # add arrows
+    geom_segment(aes(x = 2.05, y = 4.85, xend = 2.35, yend = 4.85),
+                 arrow = arrow(length = unit(0.2, "cm")), colour = "grey") +
+    geom_segment(aes(x = 0.35, y = 4.85, xend = 0.05, yend = 4.85),
+                 arrow = arrow(length = unit(0.2, "cm")), colour = "grey") +
+    # axes and theme
     ylab("Mental state class") +
     scale_x_continuous(
       name = "Posterior odds ratio\n(difference between English and Tongan)",
       breaks = seq(0, 2, by = 0.5),
-      limits = c(0, 2.25)
+      limits = c(0, 2.35)
       ) +
     theme_minimal()
   # save plot
-  ggsave(out, filename = "plots/model1.pdf", width = 6, height = 5)
+  ggsave(out, filename = filename, width = 6, height = 5)
   return(out)
 }
