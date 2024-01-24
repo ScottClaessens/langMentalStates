@@ -1,7 +1,7 @@
 # custom functions for study 1
 
 # plot proportions of definitions
-plotProportions <- function(d) {
+plotProportions <- function(d, title, file) {
   # plot
   out <-
     d %>%
@@ -27,17 +27,21 @@ plotProportions <- function(d) {
       ) +
     labs(
       x = "Mental state class",
-      y = "Proportion of definitions"
+      y = "Proportion of definitions",
+      title = title
     ) +
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
   # save
-  ggsave(out, filename = "plots/study1/proportions.pdf", width = 6, height = 4)
+  ggsave(out, filename = file, width = 6, height = 4)
   return(out)
 }
 
 # pivot data wider
 pivotDataWider <- function(d) {
+  # if word column doesn't exist, create it
+  if (!("word" %in% colnames(d))) d$word <- d$word_cc
+  # pivot wider
   d %>%
     group_by(word) %>%
     summarise(
@@ -112,7 +116,7 @@ fitModel2 <- function(dWide, outcome) {
 }
 
 # plot results from models
-plotModelResults <- function(hyp1, hyp2) {
+plotModelResults <- function(hyp) {
   # extract posterior from list of brmsfit.hypothesis objects
   extractPost <- function(hyp, label) {
     # extract posterior log odds differences
