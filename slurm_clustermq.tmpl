@@ -1,0 +1,13 @@
+#!/bin/sh
+# From https://github.com/mschubert/clustermq/wiki/SLURM
+#SBATCH --job-name={{ job_name }}           # job name
+#SBATCH --output=worker.%A_%a.out           # you can add .%a for array index
+#SBATCH --error=worker.%A_%a.err            # log file
+#SBATCH --mem=4G                            # memory
+#SBATCH --time=00-02:00:00                  # Walltime (DD-HH:MM:SS)
+#SBATCH --array=1-{{ n_jobs }}              # job array
+#SBATCH --cpus-per-task=1                   # 1 CPU
+#SBATCH --account=uoa03415                  # Project code
+module load R
+CMQ_AUTH={{ auth }} R --no-save --no-restore -e 'clustermq:::worker("{{ master }}")'
+

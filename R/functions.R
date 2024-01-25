@@ -116,51 +116,46 @@ fitModel2 <- function(dWide, outcome) {
 }
 
 # plot results from models
-plotModelResults <- function(hyp) {
-  # extract posterior from list of brmsfit.hypothesis objects
-  extractPost <- function(hyp, label) {
-    # extract posterior log odds differences
-    post <-
-      lapply(hyp, function(x) x$samples[,1]) %>%
-      as_tibble()
-    # labels for plot
-    colnames(post) <- c(
-      "Overall",
-      "Belief/\nKnowledge",
-      "Desire/\nWish",
-      "Intention",
-      "Perception",
-      "Emotion",
-      "Arousal",
-      "Other"
-    )
-    post %>%
-      pivot_longer(
-        cols = everything(),
-        names_to = "model",
-        values_to = "diff"
-        ) %>%
-      mutate(
-        # correct ordering for plot
-        model = factor(model, levels = c("Overall", "Belief/\nKnowledge", "Emotion",
-                                         "Intention", "Perception", "Desire/\nWish",
-                                         "Arousal", "Other")),
-        # calculate odds ratio
-        OR = exp(diff),
-        # label this set of models
-        label = label
+plotModelResults <- function(hyp, title, file) {
+  # list of labels
+  labels <- c(
+      "mentalState" = "Overall",
+      "BK" = "Belief/\nKnowledge",
+      "IN" = "Intention",
+      "EM" = "Emotion",
+      "DW" = "Desire/\nWish",
+      "PE" = "Perception",
+      "AR" = "Arousal",
+      "OT" = "Other"
       )
-  }
+  # extract posterior log odds differences
   out <-
-    # combine both sets of models
-    bind_rows(
-      extractPost(hyp1, label = "No controls\n(n = 78685)"),
-      extractPost(hyp2, label = "Controlling for\nword class\n(n = 47260)")
+    lapply(hyp, function(x) x$samples[,1]) %>%
+    as_tibble() %>%
+    pivot_longer(
+      cols = everything(),
+      names_to = "model",
+      values_to = "diff"
+      ) %>%
+    mutate(
+      model = str_remove(model, "hyp_"),
+      model = str_replace(model, "mental_state", "mentalState")
     ) %>%
-    mutate(label = factor(label, levels = c("No controls\n(n = 78685)",
-                                            "Controlling for\nword class\n(n = 47260)"))) %>%
+    separate(model, into = c("study", "outcome", "controls"), sep = "_") %>%
+    # correct ordering for plot
+    mutate(
+      outcome = factor(labels[outcome], levels = labels),
+      controls = ifelse(study == "dWide1",
+                        ifelse(controls == "fitModel1",
+                               "No controls\n(78685 words)",
+                               "Controlling for\nword class\n(47260 words)"),
+                        ifelse(controls == "fitModel1",
+                               "No controls\n(2342 words) ",
+                               "Controlling for\nword class\n(2031 words) ")),
+      controls = fct_rev(controls)
+    ) %>%
     # plot
-    ggplot(aes(x = diff, y = fct_rev(model), colour = label)) +
+    ggplot(aes(x = diff, y = fct_rev(outcome), colour = controls)) +
     # effect size windows
     # https://easystats.github.io/effectsize/articles/interpret.html#chen2010big
     annotate("rect", xmin = -1.25, xmax = 1.25, ymin = -Inf, ymax = Inf,
@@ -181,9 +176,12 @@ plotModelResults <- function(hyp) {
     geom_segment(aes(x = -1.40, y = 4.8, xend = -1.70, yend = 4.8),
                  arrow = arrow(length = unit(0.2, "cm")), colour = "grey") +
     # axes and theme
-    ylab("Mental state class") +
+    labs(
+      x = "Posterior log odds difference\nbetween English and Tongan",
+      y = "Mental state class",
+      title = title
+      ) +
     scale_x_continuous(
-      name = "Posterior log odds difference\nbetween English and Tongan",
       breaks = seq(-1.5, 1.5, by = 0.5),
       limits = c(-1.75, 1.75)
       ) +
@@ -194,6 +192,6 @@ plotModelResults <- function(hyp) {
       legend.spacing.y = unit(2, 'mm')
       )
   # save plot
-  ggsave(out, filename = "plots/study1/models.pdf", width = 7, height = 4)
+  ggsave(out, filename = file, width = 7, height = 4)
   return(out)
 }

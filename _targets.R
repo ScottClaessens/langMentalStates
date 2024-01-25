@@ -4,6 +4,12 @@ library(targets)
 library(tidyverse)
 source("R/functions.R")
 
+# options for running in parallel with clustermq
+options(
+  clustermq.scheduler = "slurm", 
+  clustermq.template = "slurm_clustermq.tmpl"
+)
+
 # packages for pipeline
 tar_option_set(packages = c("brms", "readxl", "tidybayes", "tidyverse"))
 
@@ -19,7 +25,8 @@ targetsModels <-
     # fit models
     tar_target(m, modelFunction(dataset, outcome)),
     # extract language differences
-    tar_target(hyp, hypothesis(m, "b_languageeng - b_languageton = 0", class = NULL))
+    tar_target(hyp, hypothesis(m, "b_languageeng - b_languageton = 0", 
+                               class = NULL))
   )
 
 # full pipeline
@@ -37,10 +44,11 @@ list(
   # get data in wide format for modelling
   tar_target(dWide1, pivotDataWider(d1)),
   # fit models and extract language differences
-  #targetsModels,
-  #tar_combine(hyp1, targetsModels$hyp[1:16], command = list(!!!.x)),
-  ## plot model results
-  #tar_target(plotModels1, plotModelResults(hyp1)),
+  targetsModels,
+  tar_combine(hyp1, targetsModels$hyp[1:16], command = list(!!!.x)),
+  # plot model results
+  tar_target(plotModels1, plotModelResults(hyp1, title = "Dictionary study",
+                                           file = "plots/study1/models.pdf")),
   
   
   ### Study 2 - Common Crawl
@@ -55,12 +63,14 @@ list(
   # get data in wide format for modelling
   tar_target(dWide2, pivotDataWider(d2)),
   # fit models and extract language differences
-  #tar_combine(hyp2, targetsModels$hyp[17:32], command = list(!!!.x)),
+  tar_combine(hyp2, targetsModels$hyp[17:32], command = list(!!!.x)),
   # plot model results
-  #tar_target(plotModels2, plotModelResults(hyp2)),
+  tar_target(plotModels2, plotModelResults(hyp2, title = "Common crawl study",
+                                           file = "plots/study2/models.pdf")),
   
   ### Session info
   
-  tar_target(sessionInfo, writeLines(capture.output(sessionInfo()), "sessionInfo.txt"))
+  tar_target(sessionInfo, writeLines(capture.output(sessionInfo()), 
+                                     "sessionInfo.txt"))
   
 )
