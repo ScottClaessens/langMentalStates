@@ -43,7 +43,7 @@ pivotDataWider <- function(d) {
   if (!("word" %in% colnames(d))) d$word <- d$word_cc
   # pivot wider
   d %>%
-    group_by(word) %>%
+    group_by(word, language) %>%
     summarise(
       # english or tongan
       language = unique(language),
@@ -148,10 +148,10 @@ plotModelResults <- function(hyp, title, file) {
       controls = ifelse(study == "dWide1",
                         ifelse(controls == "fitModel1",
                                "No controls\n(78685 words)",
-                               "Controlling for\nword class\n(47260 words)"),
+                               "Controlling for\nword class\n(47125 words)"),
                         ifelse(controls == "fitModel1",
                                "No controls\n(2342 words) ",
-                               "Controlling for\nword class\n(2031 words) ")),
+                               "Controlling for\nword class\n(2028 words) ")),
       controls = fct_rev(controls)
     ) %>%
     # plot
