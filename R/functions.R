@@ -1,7 +1,10 @@
-# custom functions for study 1
+# custom functions
 
 # plot proportions of definitions
 plotProportions <- function(d, title, file) {
+  # list of labels
+  labels <- c("Overall","Belief/\nKnowledge","Emotion","Intention",
+              "Desire/\nWish","Perception","Arousal","Other")
   # plot
   out <-
     d %>%
@@ -17,7 +20,8 @@ plotProportions <- function(d, title, file) {
       Other                = mean(OT)
     ) %>%
     pivot_longer(cols = !language) %>%
-    ggplot(aes(x = fct_reorder2(name, language, value), y = value,
+    mutate(name = factor(name, levels = labels)) %>%
+    ggplot(aes(x = name, y = value,
                fill = language)) +
     geom_col(position = "dodge", colour = "black") +
     scale_fill_manual(
@@ -30,6 +34,7 @@ plotProportions <- function(d, title, file) {
       y = "Proportion of definitions",
       title = title
     ) +
+    ylim(c(0, 0.074)) +
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
   # save
@@ -37,80 +42,48 @@ plotProportions <- function(d, title, file) {
   return(out)
 }
 
-# pivot data wider
-pivotDataWider <- function(d) {
-  # if word column doesn't exist, create it
-  if (!("word" %in% colnames(d))) d$word <- d$word_cc
-  # pivot wider
-  d %>%
-    group_by(word, language) %>%
-    summarise(
-      # english or tongan
-      language = unique(language),
-      # number of definitions with mental states
-      mental_state = sum(mental_state),
-      BK = sum(BK),
-      DW = sum(DW),
-      IN = sum(IN),
-      PE = sum(PE),
-      EM = sum(EM),
-      AR = sum(AR),
-      OT = sum(OT),
-      # total number of definitions
-      n = n(),
-      # word class proportions
-      noun       = mean(noun,       na.rm = TRUE),
-      adjective  = mean(adjective,  na.rm = TRUE),
-      adverb     = mean(adverb,     na.rm = TRUE),
-      verb       = mean(verb,       na.rm = TRUE),
-      comb_other = mean(comb_other, na.rm = TRUE),
-      .groups = "drop"
-    )
-}
-
 # fit model 1 (no controls)
-fitModel1 <- function(dWide, outcome) {
+fitModel1 <- function(d, outcome) {
+  # wrangle data
+  if (!("word" %in% colnames(d))) d$word <- d$word_cc
+  # fit model
   brm(
     formula = bf(
-      paste0(outcome, " | trials(n) ~ 0 + language"),
-      "phi ~ 0 + language"
+      paste0(outcome, " ~ 0 + language + (1 | word:language)")
       ),
-    data = dWide,
-    family = beta_binomial,
+    data = d,
+    family = bernoulli,
     prior = c(
       # priors based on prior predictive check
       prior(normal(-2, 1), class = b, coef = languageeng),
       prior(normal(-2, 1), class = b, coef = languageton),
-      prior(normal(-1, 0.5), class = b, coef = languageeng, dpar = phi),
-      prior(normal(-1, 0.5), class = b, coef = languageton, dpar = phi)
+      prior(exponential(1), class = sd)
     ),
-    sample_prior = "yes",
     cores = 4
   )
 }
 
 # fit model 2 (with word class controls)
-fitModel2 <- function(dWide, outcome) {
+fitModel2 <- function(d, outcome) {
+  # wrangle data
+  if (!("word" %in% colnames(d))) d$word <- d$word_cc
+  # fit model
   brm(
     formula = bf(
-      paste0(outcome, " | trials(n) ~ 0 + language",
-             " + noun + adjective + adverb + verb"),
-      "phi ~ 0 + language"
+      paste0(outcome, " ~ 0 + language + noun + adjective + adverb + verb + (1 | word:language)")
     ),
-    data = dWide,
-    family = beta_binomial,
+    data = d,
+    family = bernoulli,
     prior = c(
       # priors based on prior predictive check
       prior(normal(-2, 1), class = b, coef = languageeng),
       prior(normal(-2, 1), class = b, coef = languageton),
-      prior(normal(0, 1), class = b, coef = noun),
-      prior(normal(0, 1), class = b, coef = adjective),
-      prior(normal(0, 1), class = b, coef = adverb),
-      prior(normal(0, 1), class = b, coef = verb),
-      prior(normal(-1, 0.5), class = b, coef = languageeng, dpar = phi),
-      prior(normal(-1, 0.5), class = b, coef = languageton, dpar = phi)
+      prior(normal(0, 1), class = b, coef = nounTRUE),
+      prior(normal(0, 1), class = b, coef = adjectiveTRUE),
+      prior(normal(0, 1), class = b, coef = adverbTRUE),
+      prior(normal(0, 1), class = b, coef = verbTRUE),
+      prior(exponential(1), class = sd)
     ),
-    sample_prior = "yes",
     cores = 4
   )
 }
@@ -121,8 +94,8 @@ plotModelResults <- function(hyp, title, file) {
   labels <- c(
       "mentalState" = "Overall",
       "BK" = "Belief/\nKnowledge",
-      "IN" = "Intention",
       "EM" = "Emotion",
+      "IN" = "Intention",
       "DW" = "Desire/\nWish",
       "PE" = "Perception",
       "AR" = "Arousal",
@@ -145,7 +118,7 @@ plotModelResults <- function(hyp, title, file) {
     # correct ordering for plot
     mutate(
       outcome = factor(labels[outcome], levels = labels),
-      controls = ifelse(study == "dWide1",
+      controls = ifelse(study == "d1",
                         ifelse(controls == "fitModel1",
                                "No controls\n(78685 words)",
                                "Controlling for\nword class\n(47125 words)"),
@@ -166,14 +139,14 @@ plotModelResults <- function(hyp, title, file) {
     # posterior odds ratios
     stat_pointinterval(position = position_dodge(width = 0.4)) +
     # add direction annotations
-    annotate("text", label = "more common\nin English", x = 1.55, y = 4.4,
+    annotate("text", label = "more common\nin English", x = 1.55, y = 5.0,
              size = 2.5, fontface = "italic", colour = "grey") +
-    annotate("text", label = "more common\nin Tongan", x = -1.55, y = 4.4,
+    annotate("text", label = "more common\nin Tongan", x = -1.55, y = 5.0,
              size = 2.5, fontface = "italic", colour = "grey") +
     # add arrows
-    geom_segment(aes(x = 1.40, y = 4.8, xend = 1.70, yend = 4.8),
+    geom_segment(aes(x = 1.40, y = 5.4, xend = 1.70, yend = 5.4),
                  arrow = arrow(length = unit(0.2, "cm")), colour = "grey") +
-    geom_segment(aes(x = -1.40, y = 4.8, xend = -1.70, yend = 4.8),
+    geom_segment(aes(x = -1.40, y = 5.4, xend = -1.70, yend = 5.4),
                  arrow = arrow(length = unit(0.2, "cm")), colour = "grey") +
     # axes and theme
     labs(
