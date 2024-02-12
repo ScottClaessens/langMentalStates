@@ -123,8 +123,8 @@ plotModelResults <- function(hyp, title, file) {
                                "No controls\n(78685 words)",
                                "Controlling for\nword class\n(47125 words)"),
                         ifelse(controls == "fitModel1",
-                               "No controls\n(2342 words) ",
-                               "Controlling for\nword class\n(2028 words) ")),
+                               "No controls\n(2400 words) ",
+                               "Controlling for\nword class\n(2068 words) ")),
       controls = fct_rev(controls)
     ) %>%
     # plot
@@ -139,14 +139,14 @@ plotModelResults <- function(hyp, title, file) {
     # posterior odds ratios
     stat_pointinterval(position = position_dodge(width = 0.4)) +
     # add direction annotations
-    annotate("text", label = "more common\nin English", x = 1.55, y = 5.0,
+    annotate("text", label = "more common\nin English", x = 2.55, y = 5.0,
              size = 2.5, fontface = "italic", colour = "grey") +
-    annotate("text", label = "more common\nin Tongan", x = -1.55, y = 5.0,
+    annotate("text", label = "more common\nin Tongan", x = -2.55, y = 5.0,
              size = 2.5, fontface = "italic", colour = "grey") +
     # add arrows
-    geom_segment(aes(x = 1.40, y = 5.4, xend = 1.70, yend = 5.4),
+    geom_segment(aes(x = 2.40, y = 5.4, xend = 2.70, yend = 5.4),
                  arrow = arrow(length = unit(0.2, "cm")), colour = "grey") +
-    geom_segment(aes(x = -1.40, y = 5.4, xend = -1.70, yend = 5.4),
+    geom_segment(aes(x = -2.40, y = 5.4, xend = -2.70, yend = 5.4),
                  arrow = arrow(length = unit(0.2, "cm")), colour = "grey") +
     # axes and theme
     labs(
@@ -155,8 +155,8 @@ plotModelResults <- function(hyp, title, file) {
       title = title
       ) +
     scale_x_continuous(
-      breaks = seq(-1.5, 1.5, by = 0.5),
-      limits = c(-1.75, 1.75)
+      breaks = seq(-3, 3, by = 1),
+      limits = c(-3, 3)
       ) +
     guides(colour = guide_legend(byrow = TRUE)) +
     theme_minimal() +
