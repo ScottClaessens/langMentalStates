@@ -1,13 +1,13 @@
 # custom functions
 
 # plot proportions of definitions
-plotProportions <- function(d, title, file) {
+plotProportions1 <- function(d1) {
   # list of labels
   labels <- c("Overall","Belief/\nKnowledge","Emotion","Intention",
               "Desire/\nWish","Perception","Arousal","Other")
   # plot
   out <-
-    d %>%
+    d1 %>%
     group_by(language) %>%
     summarise(
       Overall              = mean(mental_state),
@@ -32,13 +32,13 @@ plotProportions <- function(d, title, file) {
     labs(
       x = "Mental state class",
       y = "Proportion of definitions",
-      title = title
+      title = "Dictionary study"
     ) +
     ylim(c(0, 0.074)) +
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
   # save
-  ggsave(out, filename = file, width = 6, height = 4)
+  ggsave(out, filename = "plots/study1/proportions.pdf", width = 6, height = 4)
   return(out)
 }
 
@@ -89,7 +89,7 @@ fitModel2 <- function(d, outcome) {
 }
 
 # plot results from models
-plotModelResults <- function(hyp, title, file) {
+plotModelResults1 <- function(hyp) {
   # list of labels
   labels <- c(
       "mentalState" = "Overall",
@@ -139,24 +139,24 @@ plotModelResults <- function(hyp, title, file) {
     # posterior odds ratios
     stat_pointinterval(position = position_dodge(width = 0.4)) +
     # add direction annotations
-    annotate("text", label = "more common\nin English", x = 2.55, y = 5.0,
+    annotate("text", label = "more common\nin English", x = 1.55, y = 5.0,
              size = 2.5, fontface = "italic", colour = "grey") +
-    annotate("text", label = "more common\nin Tongan", x = -2.55, y = 5.0,
+    annotate("text", label = "more common\nin Tongan", x = -1.55, y = 5.0,
              size = 2.5, fontface = "italic", colour = "grey") +
     # add arrows
-    geom_segment(aes(x = 2.40, y = 5.4, xend = 2.70, yend = 5.4),
+    geom_segment(aes(x = 1.40, y = 5.4, xend = 1.70, yend = 5.4),
                  arrow = arrow(length = unit(0.2, "cm")), colour = "grey") +
-    geom_segment(aes(x = -2.40, y = 5.4, xend = -2.70, yend = 5.4),
+    geom_segment(aes(x = -1.40, y = 5.4, xend = -1.70, yend = 5.4),
                  arrow = arrow(length = unit(0.2, "cm")), colour = "grey") +
     # axes and theme
     labs(
       x = "Posterior log odds difference\nbetween English and Tongan",
       y = "Mental state class",
-      title = title
+      title = "Dictionary study"
       ) +
     scale_x_continuous(
-      breaks = seq(-3, 3, by = 1),
-      limits = c(-3, 3)
+      breaks = seq(-2, 2, by = 1),
+      limits = c(-2, 2)
       ) +
     guides(colour = guide_legend(byrow = TRUE)) +
     theme_minimal() +
@@ -165,6 +165,135 @@ plotModelResults <- function(hyp, title, file) {
       legend.spacing.y = unit(2, 'mm')
       )
   # save plot
-  ggsave(out, filename = file, width = 7, height = 4)
+  ggsave(out, filename = "plots/study1/models.pdf", width = 7, height = 4)
   return(out)
+}
+
+# load common crawl data
+loadData2 <- function(fileData2) {
+  # load rds file
+  readRDS(fileData2) %>%
+    # summarise for modelling
+    group_by(word, language, domain, domain_type, domain_n_words_all,
+             domain_n_words_coded, domain_n_pages, word_n_uses_in_domain,
+             word_n_pages_in_domain) %>%
+    # proportion of definitions at word-level
+    summarise_at(
+      vars(noun, verb, adjective, adverb, comb_other,
+           mental_state, BK, DW, IN, PE, EM, AR, OT),
+      function(x) mean(x, na.rm = TRUE)
+      ) %>%
+    ungroup()
+}
+
+# plot proportions
+plotProportions2 <- function(d2) {
+  # list of labels
+  labels <- c("Overall","Belief/\nKnowledge","Emotion","Intention",
+              "Desire/\nWish","Perception","Arousal","Other")
+  # plot
+  out <-
+    d2 %>%
+    transmute(
+      language = language,
+      word = word,
+      domain = domain,
+      # for plotting, binarise into mental state word or not
+      # if at least one definition matches, categorise as mental state
+      Overall              = ifelse(mental_state == 0, 0, 1),
+      `Belief/\nKnowledge` = ifelse(BK == 0, 0, 1),
+      `Desire/\nWish`      = ifelse(DW == 0, 0, 1),
+      Intention            = ifelse(IN == 0, 0, 1),
+      Perception           = ifelse(PE == 0, 0, 1),
+      Emotion              = ifelse(EM == 0, 0, 1),
+      Arousal              = ifelse(AR == 0, 0, 1),
+      Other                = ifelse(OT == 0, 0, 1),
+      # calculate proportion of times word used on domain
+      propUsage = word_n_uses_in_domain / domain_n_words_all
+    ) %>%
+    pivot_longer(
+      cols = Overall:Other,
+      names_to = "mentalStateClass",
+      values_to = "mentalStateCode"
+    ) %>%
+    mutate(
+      mentalStateClass = factor(mentalStateClass, levels = labels),
+      language = ifelse(language == "eng", "English", "Tongan")
+      ) %>%
+    # focus only on mental state words for plot
+    filter(mentalStateCode != 0) %>%
+    group_by(language, mentalStateClass) %>%
+    # get average percentage of word uses on domains
+    summarise(propUsage = mean(propUsage, na.rm = TRUE)) %>%
+    # plotting
+    ggplot(aes(x = mentalStateClass, y = propUsage, fill = language)) +
+    geom_col(position = "dodge", colour = "black") +
+    scale_fill_manual(
+      name = "Language",
+      labels = c("English","Tongan"),
+      values = c("gray25","white")
+    ) +
+    scale_y_continuous(labels = scales::percent) +
+    labs(
+      x = "Mental state class",
+      y = "Average percentage of word uses on domains",
+      title = "Common crawl study"
+    ) +
+    #ylim(c(0, 0.074)) +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
+  # save
+  ggsave(out, filename = "plots/study2/proportions.pdf", width = 6, height = 4)
+  return(out)
+}
+
+# fit usage model 1
+fitUsageModel1 <- function(d2, mentalStateVar) {
+  # mental state variable in data
+  d2$mentalState <- pull(d2, !!mentalStateVar)
+  # fit model
+  brm(
+    formula = bf(
+      paste0(
+        "word_n_uses_in_domain | trials(domain_n_words_all)",
+        " ~ 1 + language*mentalState",
+        " + (1 | word) + (1 | domain)"
+        )
+    ),
+    data = d2,
+    family = binomial,
+    prior = c(
+      # priors based on prior predictive check
+      prior(normal(-5, 1), class = Intercept),
+      prior(normal(0, 1), class = b),
+      prior(exponential(1), class = sd)
+    ),
+    cores = 4
+  )
+}
+
+# fit usage model 2
+fitUsageModel2 <- function(d2, mentalStateVar) {
+  # mental state variable in data
+  d2$mentalState <- pull(d2, !!mentalStateVar)
+  # fit model
+  brm(
+    formula = bf(
+      paste0(
+        "word_n_uses_in_domain | trials(domain_n_words_all)",
+        " ~ 1 + language*mentalState",
+        " + noun + verb + adjective + adverb + domain_type",
+        " + (1 | word) + (1 | domain)"
+      )
+    ),
+    data = d2,
+    family = binomial,
+    prior = c(
+      # priors based on prior predictive check
+      prior(normal(-5, 1), class = Intercept),
+      prior(normal(0, 1), class = b),
+      prior(exponential(1), class = sd)
+    ),
+    cores = 4
+  )
 }

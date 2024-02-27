@@ -11,14 +11,14 @@ options(
 )
 
 # packages for pipeline
-tar_option_set(packages = c("brms", "readxl", "tidybayes", "tidyverse"))
+tar_option_set(packages = c("brms","readxl","scales","tidybayes","tidyverse"))
 
-# targets for model fitting
-targetsModels <-
+# targets for study 1 model fitting
+targetsModels1 <-
   tar_map(
     # loop over outcome variables
     values = expand_grid(
-      dataset = rlang::syms(c("d1", "d2")),
+      dataset = rlang::syms("d1"),
       outcome = c("mental_state","BK","DW","IN","PE","EM","AR","OT"),
       modelFunction = rlang::syms(c("fitModel1", "fitModel2"))
       ),
@@ -27,6 +27,19 @@ targetsModels <-
     # extract language differences
     tar_target(hyp, hypothesis(m, "b_languageeng - b_languageton = 0", 
                                class = NULL))
+  )
+
+# targets for study 2 model fitting
+targetsModels2 <-
+  tar_map(
+    # loop over outcome variables
+    values = expand_grid(
+      dataset = rlang::syms("d2"),
+      mentalStateVar = c("mental_state","BK","DW","IN","PE","EM","AR","OT"),
+      modelFunction = rlang::syms(c("fitUsageModel1", "fitUsageModel2"))
+    ),
+    # fit models
+    tar_target(m, modelFunction(dataset, mentalStateVar))
   )
 
 # full pipeline
@@ -39,30 +52,25 @@ list(
   # load dictionary data
   tar_target(d1, readRDS(fileData1)),
   # plot proportions of definitions
-  tar_target(plotProp1, plotProportions(d1, title = "Dictionary study",
-                                        file = "plots/study1/proportions.pdf")),
+  tar_target(plotProp1, plotProportions1(d1)),
   # fit models and extract language differences
-  targetsModels,
-  tar_combine(hyp1, targetsModels$hyp[1:16], command = list(!!!.x)),
+  targetsModels1,
+  tar_combine(hyp1, targetsModels1$hyp, command = list(!!!.x)),
   # plot model results
-  tar_target(plotModels1, plotModelResults(hyp1, title = "Dictionary study",
-                                           file = "plots/study1/models.pdf")),
+  tar_target(plotModels1, plotModelResults1(hyp1)),
   
   
   ### Study 2 - Common Crawl
   
   # files
-  tar_target(fileData2, "data/study2/commonCrawl.rds", format = "file"),
+  tar_target(fileData2, "data/study2/combinedDomainData.rds", format = "file"),
   # load common crawl data
-  tar_target(d2, readRDS(fileData2)),
-  # plot proportions of definitions
-  tar_target(plotProp2, plotProportions(d2, title = "Common crawl study",
-                                        file = "plots/study2/proportions.pdf")),
-  # fit models and extract language differences
-  tar_combine(hyp2, targetsModels$hyp[17:32], command = list(!!!.x)),
-  # plot model results
-  tar_target(plotModels2, plotModelResults(hyp2, title = "Common crawl study",
-                                           file = "plots/study2/models.pdf")),
+  tar_target(d2, loadData2(fileData2)),
+  # plot proportions
+  tar_target(plotProp2, plotProportions2(d2)),
+  # fit usage models and extract language differences
+  targetsModels2,
+  
   
   ### Session info
   
