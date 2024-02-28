@@ -51,3 +51,15 @@ plotProportions2|function|377fd509002aabd6|||||||||||||||
 sessionInfo|stem|160cfac987b50f6c|74c06756c0452f1d|696eeb75af4c39be|-1689045739||t19760.8924812584s|c9aaea90a821e608|53|rds|local|vector|||6.271||
 targetsModels|object|e654ce8073671af0|||||||||||||||
 targetsModels1|object|3caf471920bef10e|||||||||||||||
+plotModelResults1|function|897abc784a752f0a
+plotProportions1|function|7466f8018258dec5
+targetsModels1|object|3caf471920bef10e
+plotProportions2|function|377fd509002aabd6
+targetsModels2|object|a6f3ae5d75e415a0
+loadData2|function|bc1f4ec1c2562421
+fitUsageModel1|function|0aa74ba54f31e9aa
+fitUsageModel2|function|0142d086d2a62f9b
+fitModel1|function|16d72f00914eb8eb
+fitModel2|function|6425d125170b9e3c
+fileData2|stem|7952dc9a5e93ccd7|aa97b1783a5c9bcc|ef46db3751d8e999|517815117|data/study2/combinedDomainData.rds|t19780.8803814787s|353422c081c7c9e8|12632190|file|local|vector|||6.22|package brms was built under R version 4.2.3. package Rcpp was built under R version 4.2.3|
+d2|stem|e5eba61e17e31e80|1b8185b28776b402|cf6ce6b8d346b8a2|-307729790||t19781.005107763s|63716b896eb9a8ae|289100|rds|local|vector|||10.48||
